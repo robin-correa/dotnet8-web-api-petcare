@@ -1,4 +1,6 @@
-﻿using dotnet8_web_api_petcare.Data;
+﻿using AutoMapper;
+
+using dotnet8_web_api_petcare.Data;
 using dotnet8_web_api_petcare.Dtos.Services;
 using dotnet8_web_api_petcare.Models.Domains;
 using dotnet8_web_api_petcare.Repositories.Interfaces;
@@ -13,11 +15,13 @@ namespace dotnet8_web_api_petcare.Controllers
     {
         private readonly AppDbContext _appDbContext;
         private readonly IServiceRepository _serviceRepository;
+        private readonly IMapper _mapper;
 
-        public ServicesController(AppDbContext appDbContext, IServiceRepository serviceRepository)
+        public ServicesController(AppDbContext appDbContext, IServiceRepository serviceRepository, IMapper mapper)
         {
             _appDbContext = appDbContext;
             _serviceRepository = serviceRepository;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -25,22 +29,7 @@ namespace dotnet8_web_api_petcare.Controllers
         {
             var services = await _serviceRepository.GetAllAsync();
 
-            var serviceCollections = new List<GetServiceDto>();
-            foreach (var serviceData in services)
-            {
-                serviceCollections.Add(new GetServiceDto()
-                {
-                    Id = serviceData.Id,
-                    Name = serviceData.Name,
-                    Description = serviceData.Description,
-                    MinPrice = serviceData.MinPrice,
-                    MaxPrice = serviceData.MaxPrice,
-                    Status = serviceData.Status,
-                    CreatedAt = serviceData.CreatedAt,
-                    UpdatedAt = serviceData.UpdatedAt,
-                });
-            }
-            return Ok(services);
+            return Ok(_mapper.Map<List<GetServiceDto>>(services));
         }
 
         [HttpGet]
@@ -54,47 +43,18 @@ namespace dotnet8_web_api_petcare.Controllers
                 return NotFound();
             }
 
-            var serviceResource = new GetServiceDto
-            {
-                Id = service.Id,
-                Name = service.Name,
-                Description = service.Description,
-                MinPrice = service.MinPrice,
-                MaxPrice = service.MaxPrice,
-                Status = service.Status,
-                CreatedAt = service.CreatedAt,
-                UpdatedAt = service.UpdatedAt,
-            };
-
-            return Ok(serviceResource);
+            return Ok(_mapper.Map<GetServiceDto>(service));
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateServiceDto request)
         {
-            var service = new Service
-            {
-                Name = request.Name,
-                Description = request.Description,
-                MinPrice = request.MinPrice,
-                MaxPrice = request.MaxPrice,
-                Status = request.Status,
-            };
+            var service = _mapper.Map<Service>(request);
 
             await _appDbContext.Services.AddAsync(service);
             await _appDbContext.SaveChangesAsync();
 
-            var serviceResource = new GetServiceDto
-            {
-                Id = service.Id,
-                Name = service.Name,
-                Description = service.Description,
-                MinPrice = service.MinPrice,
-                MaxPrice = service.MaxPrice,
-                Status = service.Status,
-                CreatedAt = service.CreatedAt,
-                UpdatedAt = service.UpdatedAt,
-            };
+            var serviceResource = _mapper.Map<Service>(service);
 
             return CreatedAtAction(nameof(Show), new { id = service.Id }, serviceResource);
         }
@@ -103,14 +63,7 @@ namespace dotnet8_web_api_petcare.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateServiceDto request)
         {
-            var serviceResource = new Service
-            {
-                Name = request.Name,
-                Description = request.Description,
-                MinPrice = request.MinPrice,
-                MaxPrice = request.MaxPrice,
-                Status = request.Status,
-            };
+            var serviceResource = _mapper.Map<Service>(request);
 
             serviceResource = await _serviceRepository.UpdateByIdAsync(id, serviceResource);
 
@@ -133,19 +86,7 @@ namespace dotnet8_web_api_petcare.Controllers
                 return NotFound();
             }
 
-            var serviceResource = new GetServiceDto
-            {
-                Id = service.Id,
-                Name = service.Name,
-                Description = service.Description,
-                MinPrice = service.MinPrice,
-                MaxPrice = service.MaxPrice,
-                Status = service.Status,
-                CreatedAt = service.CreatedAt,
-                UpdatedAt = service.UpdatedAt,
-            };
-
-            return Ok(serviceResource);
+            return Ok(_mapper.Map<Service>(service));
         }
     }
 }
