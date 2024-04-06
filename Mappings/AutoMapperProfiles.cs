@@ -9,7 +9,7 @@ namespace dotnet8_web_api_petcare.Mappings
     {
         public AutoMapperProfiles()
         {
-            CreateMap<Service, GetServiceDto>().ReverseMap();
+            CreateMap<GetServiceDto, Service>().ReverseMap();
             CreateMap<CreateServiceDto, Service>().ReverseMap();
             CreateMap<UpdateServiceDto, Service>().ReverseMap();
         }
