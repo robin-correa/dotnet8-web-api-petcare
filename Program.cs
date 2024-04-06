@@ -1,4 +1,6 @@
 using dotnet8_web_api_petcare.Data;
+using dotnet8_web_api_petcare.Repositories.Implementations;
+using dotnet8_web_api_petcare.Repositories.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbConnectionString"));
 });
+
+builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 
 var app = builder.Build();
 
