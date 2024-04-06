@@ -1,0 +1,6 @@
+@dotnet8_web_api_petcare_HostAddress = http://localhost:5167
+
+GET {{dotnet8_web_api_petcare_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
