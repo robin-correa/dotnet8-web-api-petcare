@@ -1,4 +1,5 @@
 using dotnet8_web_api_petcare.Data;
+using dotnet8_web_api_petcare.Mappings;
 using dotnet8_web_api_petcare.Repositories.Implementations;
 using dotnet8_web_api_petcare.Repositories.Interfaces;
 
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
 var app = builder.Build();
 
