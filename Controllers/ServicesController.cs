@@ -3,6 +3,7 @@ using dotnet8_web_api_petcare.Dtos.Services;
 using dotnet8_web_api_petcare.Models.Domains;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace dotnet8_web_api_petcare.Controllers
 {
@@ -17,9 +18,9 @@ namespace dotnet8_web_api_petcare.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var services = _appDbContext.Services.ToList();
+            var services = await _appDbContext.Services.ToListAsync();
 
             var serviceCollections = new List<GetServiceDto>();
             foreach (var serviceData in services)
@@ -41,9 +42,9 @@ namespace dotnet8_web_api_petcare.Controllers
 
         [HttpGet]
         [Route("{id:int}")]
-        public IActionResult Show([FromRoute] int id)
+        public async Task<IActionResult> Show([FromRoute] int id)
         {
-            var service = _appDbContext.Services.FirstOrDefault(x => x.Id == id);
+            var service = await _appDbContext.Services.FirstOrDefaultAsync(x => x.Id == id);
 
             if (service == null)
             {
@@ -66,7 +67,7 @@ namespace dotnet8_web_api_petcare.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] CreateServiceDto request)
+        public async Task<IActionResult> Create([FromBody] CreateServiceDto request)
         {
             var service = new Service
             {
@@ -77,8 +78,8 @@ namespace dotnet8_web_api_petcare.Controllers
                 Status = request.Status,
             };
 
-            _appDbContext.Services.Add(service);
-            _appDbContext.SaveChanges();
+            await _appDbContext.Services.AddAsync(service);
+            await _appDbContext.SaveChangesAsync();
 
             var serviceResource = new GetServiceDto
             {
@@ -97,9 +98,9 @@ namespace dotnet8_web_api_petcare.Controllers
 
         [HttpPut]
         [Route("{id:int}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] UpdateServiceDto request)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateServiceDto request)
         {
-            var service = _appDbContext.Services.FirstOrDefault(x => x.Id == id);
+            var service = await _appDbContext.Services.FirstOrDefaultAsync(x => x.Id == id);
 
             if (service == null)
             {
@@ -112,7 +113,7 @@ namespace dotnet8_web_api_petcare.Controllers
             service.MaxPrice = request.MaxPrice;
             service.Status = request.Status;
 
-            _appDbContext.SaveChanges();
+            await _appDbContext.SaveChangesAsync();
 
             var serviceResource = new GetServiceDto
             {
@@ -131,9 +132,9 @@ namespace dotnet8_web_api_petcare.Controllers
 
         [HttpDelete]
         [Route("{id:int}")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var service = _appDbContext.Services.FirstOrDefault(x => x.Id == id);
+            var service = await _appDbContext.Services.FirstOrDefaultAsync(x => x.Id == id);
 
             if (service == null)
             {
@@ -141,7 +142,7 @@ namespace dotnet8_web_api_petcare.Controllers
             }
 
             _appDbContext.Services.Remove(service);
-            _appDbContext.SaveChanges();
+            await _appDbContext.SaveChangesAsync();
 
             var serviceResource = new GetServiceDto
             {
