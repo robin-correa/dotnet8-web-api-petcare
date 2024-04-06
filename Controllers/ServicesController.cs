@@ -1,9 +1,9 @@
 ﻿using dotnet8_web_api_petcare.Data;
 using dotnet8_web_api_petcare.Dtos.Services;
 using dotnet8_web_api_petcare.Models.Domains;
+using dotnet8_web_api_petcare.Repositories.Interfaces;
 
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace dotnet8_web_api_petcare.Controllers
 {
@@ -12,15 +12,18 @@ namespace dotnet8_web_api_petcare.Controllers
     public class ServicesController : ControllerBase
     {
         private readonly AppDbContext _appDbContext;
-        public ServicesController(AppDbContext dbContext)
+        private readonly IServiceRepository _serviceRepository;
+
+        public ServicesController(AppDbContext appDbContext, IServiceRepository serviceRepository)
         {
-            _appDbContext = dbContext;
+            _appDbContext = appDbContext;
+            _serviceRepository = serviceRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var services = await _appDbContext.Services.ToListAsync();
+            var services = await _serviceRepository.GetAllAsync();
 
             var serviceCollections = new List<GetServiceDto>();
             foreach (var serviceData in services)
@@ -44,7 +47,7 @@ namespace dotnet8_web_api_petcare.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> Show([FromRoute] int id)
         {
-            var service = await _appDbContext.Services.FirstOrDefaultAsync(x => x.Id == id);
+            var service = await _serviceRepository.GetByIdAsync(id);
 
             if (service == null)
             {
@@ -100,32 +103,21 @@ namespace dotnet8_web_api_petcare.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateServiceDto request)
         {
-            var service = await _appDbContext.Services.FirstOrDefaultAsync(x => x.Id == id);
+            var serviceResource = new Service
+            {
+                Name = request.Name,
+                Description = request.Description,
+                MinPrice = request.MinPrice,
+                MaxPrice = request.MaxPrice,
+                Status = request.Status,
+            };
 
-            if (service == null)
+            serviceResource = await _serviceRepository.UpdateByIdAsync(id, serviceResource);
+
+            if (serviceResource == null)
             {
                 return NotFound();
             }
-
-            service.Name = request.Name;
-            service.Description = request.Description;
-            service.MinPrice = request.MinPrice;
-            service.MaxPrice = request.MaxPrice;
-            service.Status = request.Status;
-
-            await _appDbContext.SaveChangesAsync();
-
-            var serviceResource = new GetServiceDto
-            {
-                Id = service.Id,
-                Name = service.Name,
-                Description = service.Description,
-                MinPrice = service.MinPrice,
-                MaxPrice = service.MaxPrice,
-                Status = service.Status,
-                CreatedAt = service.CreatedAt,
-                UpdatedAt = service.UpdatedAt,
-            };
 
             return Ok(serviceResource);
         }
@@ -134,15 +126,12 @@ namespace dotnet8_web_api_petcare.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var service = await _appDbContext.Services.FirstOrDefaultAsync(x => x.Id == id);
+            var service = await _serviceRepository.DeleteByIdAsync(id);
 
             if (service == null)
             {
                 return NotFound();
             }
-
-            _appDbContext.Services.Remove(service);
-            await _appDbContext.SaveChangesAsync();
 
             var serviceResource = new GetServiceDto
             {
