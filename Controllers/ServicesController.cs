@@ -49,11 +49,6 @@ namespace dotnet8_web_api_petcare.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateServiceDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var service = _mapper.Map<Service>(request);
 
             await _appDbContext.Services.AddAsync(service);
@@ -68,11 +63,6 @@ namespace dotnet8_web_api_petcare.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateServiceDto request)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var serviceResource = _mapper.Map<Service>(request);
 
             serviceResource = await _serviceRepository.UpdateByIdAsync(id, serviceResource);
