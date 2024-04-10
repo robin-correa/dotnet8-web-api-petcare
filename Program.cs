@@ -23,6 +23,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbConnectionString"));
 });
 
+builder.Services.AddDbContext<AuthDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AuthDbConnectionString"));
+});
+
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
 
